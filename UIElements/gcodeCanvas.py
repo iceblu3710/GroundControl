@@ -564,7 +564,7 @@ class GcodeCanvas(FloatLayout, MakesmithInitFuncs):
         #Repeat until end of file
         if self.lineNumber < min(len(self.data.gcode),self.maxNumberOfLinesToRead):
             Clock.schedule_once(self.callBackMechanism)
-
+    
     def updateGcode(self, *args):
         '''
         

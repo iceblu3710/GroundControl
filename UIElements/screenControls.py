@@ -5,7 +5,7 @@ from DataStructures.makesmithInitFuncs         import   MakesmithInitFuncs
 from UIElements.buttonTemplate                 import   ButtonTemplate
 from kivy.app                                  import   App
 from UIElements.backgroundMenu                 import   BackgroundMenu
-  
+
 
 class ScreenControls(FloatLayout, MakesmithInitFuncs):
     
@@ -30,7 +30,7 @@ class ScreenControls(FloatLayout, MakesmithInitFuncs):
 
         '''
 
-        # Force the settings panel to update
+        #force the settings panel to update
         App.get_running_app().destroy_settings()
 
         #open the settings panel
@@ -38,9 +38,9 @@ class ScreenControls(FloatLayout, MakesmithInitFuncs):
     
     def show_actions(self):
         '''
-
+        
         Open A Pop-up To Allow User Actions
-
+        
         Creates a new pop-up allows the user to do things like open a file.
         
         '''

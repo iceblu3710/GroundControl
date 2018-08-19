@@ -7,7 +7,7 @@ and zooming features. It was not originally written as a stand alone module whic
 
 from kivy.uix.floatlayout                    import FloatLayout
 from kivy.properties                         import NumericProperty, ObjectProperty
-from kivy.graphics                           import Color, Ellipse, Line, Point, Quad
+from kivy.graphics                           import Color, Ellipse, Line, Point
 from kivy.clock                              import Clock
 from DataStructures.makesmithInitFuncs       import MakesmithInitFuncs
 from UIElements.positionIndicator            import PositionIndicator
@@ -23,8 +23,6 @@ import re
 import math
 import global_variables
 import sys
-from PIL import Image
-import numpy as np
 
 class GcodeCanvas(FloatLayout, MakesmithInitFuncs):
     
@@ -167,7 +165,7 @@ class GcodeCanvas(FloatLayout, MakesmithInitFuncs):
         except:
             self.data.message_queue.put("Message: Cannot reopen gcode file. It may have been moved or deleted. To locate it or open a different file use Actions > Open G-code")
             self.data.gcodeFile = ""
-        
+
     def centerCanvas(self, *args):
         '''
         
@@ -200,21 +198,6 @@ class GcodeCanvas(FloatLayout, MakesmithInitFuncs):
             elif touch.button == 'scrolldown':
                 mat = Matrix().scale(1+scaleFactor, 1+scaleFactor, 1)
                 self.scatterInstance.apply_transform(mat, anchor = touch.pos)
-
-    def flatten(self, l, ltypes=(list, tuple)):
-        ltype = type(l)
-        l = list(l)
-        i = 0
-        while i < len(l):
-            while isinstance(l[i], ltypes):
-                if not l[i]:
-                    l.pop(i)
-                    i -= 1
-                    break
-                else:
-                    l[i:i + 1] = l[i]
-            i += 1
-        return ltype(l)
 
     def drawWorkspace(self, *args):
 

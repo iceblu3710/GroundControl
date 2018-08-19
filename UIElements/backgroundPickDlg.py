@@ -6,12 +6,9 @@ from kivy.vector import Vector
 
 class BackgroundPickDlg(GridLayout, MakesmithInitFuncs):
     instructionText = StringProperty("Drag bounding box to frame edges")
-    texSize = ListProperty([800, 400])
     texture = ObjectProperty(None)
-    points = ListProperty([0, 0, 800, 0, 800, 400, 0, 400])
     tex_coords = ListProperty([0, 0, 1, 0, 1, 1, 0, 1])
-    tex_selection = ListProperty([100, 100, 600, 100, 600, 400, 100, 400])
-    widgetPadding = 0
+    tex_selection = ListProperty([0, 0, 100, 0, 100, 100, 0, 100])
 
     def __init__(self, data, **kwargs):
         super(BackgroundPickDlg, self).__init__(**kwargs)
@@ -23,13 +20,16 @@ class BackgroundPickDlg(GridLayout, MakesmithInitFuncs):
         self.update()
 
     def update(self, *args):
-        print('canvas: ', self.imWidg.size)
         if self.imWidg.size[0] is not 100 and self.imWidg.size[1] is not 100:
             # Widget is stable, update the textures bounds
             self.w, self.h = self.imWidg.size
             self.coeff_size = [self.w, self.h, self.w, self.h,
                                self.w, self.h, self.w, self.h]
-            print('New P: ',self.coeff_size)
+            # Place selection box
+            self.tex_selection = [self.w * 0.2, self.h * 0.3,
+                                  self.w * 0.9, self.h * 0.3,
+                                  self.w * 0.9, self.h * 0.9,
+                                  self.w * 0.2, self.h * 0.9]
             # Why??!!...
             self.resize_texture()
             self.reset_image()
@@ -40,22 +40,20 @@ class BackgroundPickDlg(GridLayout, MakesmithInitFuncs):
         self.tex_coords = [0, 0, 1, 0, 1, 1, 0, 1]
 
     def resize_texture(self):
-        print('enter resize')
         coeffs = []
-        padOffx = -75
-        padOffy = -65
+        padOffx, padOffy = self.imWidg.pos
         i = 0
         for (p, s) in zip(self.coeff_size, self.tex_selection):
             if i % 2:  # y coord
                 if p is not 0:
-                    coeffs.append(float(s + padOffy) / float(p))
+                    coeffs.append(float(s - padOffy) / float(p))
                 else:
-                    coeffs.append(0.0 + padOffy)
+                    coeffs.append(0.0 - padOffy)
             else:  # x coord
                 if p is not 0:
-                    coeffs.append(float(s + padOffx) / float(p))
+                    coeffs.append(float(s - padOffx) / float(p))
                 else:
-                    coeffs.append(0.0 + padOffx)
+                    coeffs.append(0.0 - padOffx)
             i += 1
         self.tex_coords = coeffs
 

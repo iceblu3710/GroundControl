@@ -5,23 +5,7 @@ from DataStructures.makesmithInitFuncs         import   MakesmithInitFuncs
 from UIElements.buttonTemplate                 import   ButtonTemplate
 from kivy.app                                  import   App
 from UIElements.backgroundMenu                 import   BackgroundMenu
-import numpy as np
-
-
-def adjust_background(self, increment):
-    '''
-    Adjust the background and refresh the UIElements
-    '''
-    img = self.data.backgroundImage
-    if img is not None:
-        img = img.astype('int16')        # Expand the range
-        img += increment                 # Do the math
-        np.clip(img, 0, 255, out=img)    # Clip the image (no wrapping!)
-        img = img.astype('uint8')        # Convert it back
-        self.data.backgroundImage = img  # Reset it
-        # Trigger a reload
-    self.data.gcodeRedraw = True
-        
+  
 
 class ScreenControls(FloatLayout, MakesmithInitFuncs):
     def setButtonAppearance(self):
@@ -76,15 +60,3 @@ class ScreenControls(FloatLayout, MakesmithInitFuncs):
         self._popup = Popup(title="Background Picture", content=content,
                             size_hint=(0.5, 0.5))
         self._popup.open()
-        
-    def brighten_background(self):
-        '''
-        Brighten the background
-        '''
-        adjust_background(self, 20)
-        
-    def darken_background(self):
-        '''
-        Darken the background
-        '''
-        adjust_background(self, -20)

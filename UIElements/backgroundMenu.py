@@ -1,12 +1,12 @@
-from kivy.uix.gridlayout                       import   GridLayout
-from UIElements.fileBrowser                    import   FileBrowser
-from kivy.uix.popup                            import   Popup
-from DataStructures.makesmithInitFuncs           import MakesmithInitFuncs
-from UIElements.BackgroundPickDlg                import BackgroundPickDlg
-from UIElements.BackgroundSettingsDlg            import BackgroundSettingsDlg
 import os
-import cv2
-import numpy as np
+from kivy.uix.gridlayout import GridLayout
+from UIElements.fileBrowser import FileBrowser
+from kivy.uix.popup import Popup
+from DataStructures.makesmithInitFuncs import MakesmithInitFuncs
+from UIElements.backgroundPickDlg import BackgroundPickDlg
+from kivy.core.image import Image as CoreImage
+from PIL import Image as PILImage
+from io import BytesIO
 import json
 
 graphicsExtensions = (".jpg", ".png", ".jp2",".webp",".pbm",".ppm",".pgm")
@@ -20,9 +20,7 @@ class BackgroundMenu(GridLayout, MakesmithInitFuncs):
 
     def updateAlignmentInConfig(self):
         self.data.config.set('Background Settings', 'manualReg',
-                             json.dumps(self.data.backgroundManualReg))
-        self.data.config.set('Background Settings', 'alignment',
-                             json.dumps(self.data.backgroundAlignment))
+                             self.data.backgroundManualReg)
         self.data.config.write()
 
     def openBackground(self):
@@ -60,13 +58,20 @@ class BackgroundMenu(GridLayout, MakesmithInitFuncs):
     def processBackground(self):
         if self.data.backgroundFile == "" or os.path.isdir(
                                                 self.data.backgroundFile):
-            self.data.backgroundImage = None
+            self.data.backgroundTexture = None
             self.data.backgroundManualReg = []
-            self.data.gcodeRedraw = True
+            self.updateAlignmentInConfig()
+            self.data.backgroundRedraw = True
             return
         else:
-            self.data.originalimage = cv2.imread(self.data.backgroundFile)
-            self.data.backgroundImage = self.data.originalimage
+            img = PILImage.open(self.data.backgroundFile)
+            img.thumbnail((1920, 1080), PILImage.ANTIALIAS)
+            img = img.transpose(PILImage.FLIP_TOP_BOTTOM)
+            imgBytes = BytesIO()
+            img.save(imgBytes, format="png")
+            imgBytes.seek(0)
+            texture = CoreImage(imgBytes, ext="png").texture
+            self.data.backgroundTexture = texture
             if self.data.backgroundManualReg:
                 # Already have centers to use; just go on to warp_image
                 self.warp_image()
@@ -75,18 +80,17 @@ class BackgroundMenu(GridLayout, MakesmithInitFuncs):
                 self.realignBackground()
 
     def realignBackground(self):
-        self.data.backgroundImage = self.data.originalimage.copy()
         content = BackgroundPickDlg(self.data)
         content.setUpData(self.data)
         content.close = self.close_PickDlg
         self._popup = Popup(title="Background PointPicker", content=content,
-                            size_hint=(1.0, 1.0))
+                            size_hint=(0.9, 0.9))
         self._popup.open()
 
     def close_PickDlg(self, instance):
-        if instance.centers:
+        if instance.accepted:
             # Update manual image registration marks
-            self.data.backgroundManualReg = instance.centers
+            self.data.backgroundManualReg = instance.tex_coords
             # Save the data from the popup
             self.updateAlignmentInConfig()
             self.warp_image()
@@ -94,31 +98,7 @@ class BackgroundMenu(GridLayout, MakesmithInitFuncs):
         self.close()
 
     def warp_image(self):
-        # Load into locals for shorthand
-        # this skew correction is similar to gcodeCanvas.py
-        centers = self.data.backgroundManualReg
-        if len(centers) == 4:
-            TL = self.data.backgroundAlignment[0]
-            TR = self.data.backgroundAlignment[1]
-            BL = self.data.backgroundAlignment[2]
-            BR = self.data.backgroundAlignment[3]
-            # Handle skew in output coordinates
-            leftmost = min(TL[0], BL[0])
-            rightmost = max(TR[0], BR[0])
-            topmost = max(TL[1], TR[1])
-            botmost = min(BL[1], BR[1])
-            h = topmost - botmost
-            w = rightmost - leftmost
-            # Construct transformation matrices
-            pts1 = np.float32([centers[0], centers[1], centers[2], centers[3]])
-            pts2 = np.float32(
-                [[TL[0]-leftmost, TL[1]-botmost], [TR[0]-leftmost, TR[1]-botmost],
-                 [BL[0]-leftmost, BL[1]-botmost], [BR[0]-leftmost, BR[1]-botmost]]) 
-            M = cv2.getPerspectiveTransform(pts1, pts2) 
-            self.data.backgroundImage = cv2.warpPerspective(
-                                        self.data.backgroundImage, M, (w, h))            
-        # Trigger a redraw
-        self.data.gcodeRedraw = True
+        self.data.backgroundRedraw = True
 
     def clear_background(self):
         '''
@@ -152,22 +132,6 @@ class BackgroundMenu(GridLayout, MakesmithInitFuncs):
         self.processBackground()   
         # Close the menu, going back to the main page.
         self.close()
-
-    def openBackgroundSettings(self):
-        '''
-        Open the background settings page
-        '''
-        content = BackgroundSettingsDlg(self.data)
-        content.setUpData(self.data)
-        content.close = self.closeBackgroundSettings
-        self._popup = Popup(title="Background Settings", content=content,
-                            size_hint=(0.5, 0.5))
-        self._popup.open()
-
-    def closeBackgroundSettings(self, instance):
-        self.updateAlignmentInConfig()
-        self.reloadBackground()
-        self._popup.dismiss()
 
     def dismiss_popup(self, *args):
         '''

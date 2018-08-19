@@ -118,14 +118,12 @@ class GroundControlApp(App):
         self.data.config  = self.config
         self.config.add_callback(self.configSettingChange)
 
-        #Image Processing
+        # Background image setup
         self.data.backgroundFile = self.config.get('Background Settings',
                                                    'backgroundFile')
-        self.data.backgroundAlignment = json.loads(
-                        self.config.get('Background Settings', 'alignment'))
         self.data.backgroundManualReg = json.loads(
                         self.config.get('Background Settings', 'manualReg'))
-        if self.data.backgroundFile!="":
+        if self.data.backgroundFile != "":
             BackgroundMenu(self.data).processBackground()
         
         '''

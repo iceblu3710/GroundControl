@@ -573,28 +573,21 @@ settings = {
                 "firmwareKey": 41
             }
         ],
-    "Background Settings": #These settings are used by the BackgroundImage routines
+    "Background Settings":
         [
             {
                 "type": "string",
                 "title": "Background File or Directory",
-                "desc": "Last background file (or a directory, indicating 'latest here'.",
+                "desc": "Current background file",
                 "key": "backgroundFile",
                 "default": ""
             },
             {
                 "type": "list",
-                "title": "alignment",
-                "desc": "Image alignment over cut surface in mm from center.",
-                "key": "alignment",
-                "default": [[-1225,615],[1225,615],[-1225,-615],[1225,-615]],
-            },
-            {
-                "type": "list",
                 "title": "Manual Registration",
-                "desc": "Corner coords for image streaching",
+                "desc": "Relative corner coords for image correction",
                 "key": "manualReg",
-                "default": [[0,0],[100,0],[0,100],[100,100]]
+                "default": []
             },
         ]
 }

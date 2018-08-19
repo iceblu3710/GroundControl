@@ -9,10 +9,10 @@ from UIElements.backgroundMenu                 import   BackgroundMenu
 
 class ScreenControls(FloatLayout, MakesmithInitFuncs):
     
-
+    
     def setButtonAppearance(self):
         '''
-
+        
         Called on creation to set up links to button background textures
         
         '''
@@ -25,14 +25,14 @@ class ScreenControls(FloatLayout, MakesmithInitFuncs):
     
     def openSettings(self):
         '''
-
+        
         Open the settings panel to manually change settings
-
+        
         '''
-
+        
         #force the settings panel to update
         App.get_running_app().destroy_settings()
-
+        
         #open the settings panel
         App.get_running_app().open_settings()
     

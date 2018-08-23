@@ -11,6 +11,7 @@ from kivy.properties                           import ObjectProperty, StringProp
 from DataStructures.makesmithInitFuncs         import MakesmithInitFuncs
 from kivy.uix.popup                            import Popup
 from UIElements.touchNumberInput               import TouchNumberInput
+from UIElements.touchGoToInput                 import TouchGoToInput
 from UIElements.zAxisPopupContent              import ZAxisPopupContent
 from DataStructures.data                       import Data
 from math                                      import sqrt
@@ -448,8 +449,8 @@ class FrontPage(Screen, MakesmithInitFuncs):
 
     def gotoLinePopup(self):
         
-        self.popupContent = TouchNumberInput(done=self.dismiss_gotoLinePopup, data=self.data)
-        self._popup = Popup(title="Go to gcode line", content=self.popupContent,
+        self.popupContent = TouchGoToInput(done=self.dismiss_gotoLinePopup, data=self.data)
+        self._popup = Popup(title="GoTo...", content=self.popupContent,
                             size_hint=(0.9, 0.9))
         self._popup.open()
         if global_variables._keyboard:
@@ -462,17 +463,22 @@ class FrontPage(Screen, MakesmithInitFuncs):
         Close The Pop-up
         
         '''
-        try:
-            line = int(float(self.popupContent.textInput.text))
-            if line < 0:
-                self.data.gcodeIndex = 0
-            elif line > len(self.data.gcode):
-                self.data.gcodeIndex = len(self.data.gcode)
+        if self.popupContent.textInput.text:
+            if self.popupContent.modeBtn.text == 'L':
+                try:
+                    line = int(float(self.popupContent.textInput.text))
+                    if line < 0:
+                        self.data.gcodeIndex = 0
+                    elif line > len(self.data.gcode):
+                        self.data.gcodeIndex = len(self.data.gcode)
+                    else:
+                        self.data.gcodeIndex = line
+                except:
+                    pass
             else:
-                self.data.gcodeIndex = line
-           
-        except:
-            pass                                                             #If what was entered cannot be converted to a number, leave the value the same
+                    self.data.quick_queue.put(self.popupContent.modeBtn.text + self.popupContent.textInput.text)
+                
+
         self._popup.dismiss()
     
     def macro(self,index):

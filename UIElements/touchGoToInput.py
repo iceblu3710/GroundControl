@@ -3,6 +3,7 @@
 This allows the user to touch or keyboard input a number when it is the content of a popup
 
 '''
+from kivy.core.window import Window
 from   kivy.uix.gridlayout                       import   GridLayout
 from   kivy.properties                           import   ObjectProperty
 from   kivy.properties                           import   StringProperty
@@ -11,13 +12,16 @@ import global_variables
 class TouchGoToInput(GridLayout):
     done   = ObjectProperty(None)
     
-    def __init__(self,**kwargs):
+    def __init__(self, **kwargs):
         self.data = kwargs.get('data')
-        super(TouchGoToInput,self).__init__(**kwargs)
+        super(TouchGoToInput, self).__init__(**kwargs)
+        global_variables._keyboard = Window.request_keyboard(self.ondismiss_popup(self), self, 'text')
+        print('init')
         if global_variables._keyboard:
             global_variables._keyboard.bind(on_key_down=self.keydown_popup)
             self.bind(on_dismiss=self.ondismiss_popup)
-        
+            print('bind')
+
     def keydown_popup(self, keyboard, keycode, text, modifiers):
         print("key: ", keycode[1])
         if (keycode[1] == '0') or (keycode[1] =='numpad0'):
@@ -97,3 +101,5 @@ class TouchGoToInput(GridLayout):
     def ondismiss_popup(self, event):
         if global_variables._keyboard:
             global_variables._keyboard.unbind(on_key_down=self.keydown_popup)
+            print('My keyboard have been closed!')
+        print('window closed')
